@@ -14,8 +14,6 @@ const requestHandler = (req, res) => {
 		return
 	}
 
-  const file = req.url.match(/^\/([a-zA-Z0-9-]+)\/?$/)[1] || 'unknown'
-
   if (req.method === 'GET') {
     try {
       res.end(fs.readFileSync('data/' + file))
@@ -24,6 +22,8 @@ const requestHandler = (req, res) => {
     }
     return
   }
+
+  const file = (req.url.match(/^\/(.+)$/)[1] || 'unknown').replace('.', 'punkt').replace('/', 'slash')
 
   let body = [];
   req.on('data', (chunk) => {
