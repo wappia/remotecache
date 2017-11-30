@@ -14,15 +14,17 @@ const requestHandler = (req, res) => {
 		return
 	}
 
-  const file = (req.url || 'unknown').replace(/[^a-zA-Z0-9]/g, '')
+  const file = 'data/' + (req.url || 'unknown').replace(/[^a-zA-Z0-9]/g, '')
 
   if (req.method === 'GET') {
-    try {
-      res.end(fs.readFileSync('data/' + file))
-    } catch (e) {
-      console.log(e)
-      res.end('')
-    }
+      fs.readFile(file, (err, data) => {
+        if (err) {
+          console.log(err)
+          res.end('')
+        } else {
+          res.end(data)
+        }
+      })
     return
   }
 
@@ -30,11 +32,18 @@ const requestHandler = (req, res) => {
   req.on('data', (chunk) => {
     body.push(chunk);
   }).on('end', () => {
-    body = Buffer.concat(body).toString();
+    body = Buffer.concat(body).toString()
 
-    fs.writeFileSync('data/' + file, body)
+    fs.writeFile(file, body, (err) => {
+      if (err) {
+        console.error(err)
+        res.statusCode = 500
+        res.end(JSON.stringify(err))
+      } else {
+        res.end('OK')
+      }
+    })
 
-    res.end('Thank you!')
   });
 }
 
